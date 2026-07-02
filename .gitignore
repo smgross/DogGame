@@ -1,0 +1,25 @@
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Build and packaging output
+build/
+dist/
+*.egg-info/
+
+# Pygame/PyInstaller temporary output
+*.spec
+prebuilt_downloads/
+prebuilt-x64/
+
+# Local editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local scratch files
+test.txt

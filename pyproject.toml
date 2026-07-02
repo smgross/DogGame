@@ -1,0 +1,12 @@
+[project]
+name = "husky-happy-run"
+version = "0.1.0"
+description = "A gentle Pygame obstacle-course game starring Nova the Husky."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "pygame>=2.6,<3",
+]
+
+[tool.uv]
+package = false
