@@ -1,6 +1,6 @@
 # Husky Happy Run
 
-A gentle Python/Pygame obstacle-course game where Nova the Husky runs through rings, jumps over fire and ponds, and needs food and water when energy runs low.
+A gentle Python/Pygame obstacle-course game where Nova or Hurley the Husky runs through rings, jumps over fire and ponds, and needs food and water when energy runs low.
 
 ## Quick Start
 
@@ -41,6 +41,8 @@ Avoid using plain `python main.py` on this machine unless you have changed your 
 ## Controls
 
 - Click: start the game from the opening screen.
+- 1/2: choose Nova or Hurley from the opening screen.
+- Tab: choose the level from the opening screen.
 - Arrow keys: steer Nova and adjust speed. Hold Left to slow her all the way to a full stop, and press Right to speed up again.
 - Space: jump.
 - F/f: eat food when nearby.
@@ -50,7 +52,14 @@ Avoid using plain `python main.py` on this machine unless you have changed your 
 - Esc: quit.
 - R or Restart button: restart after finishing.
 
-When Nova completes the course, she automatically walks back toward the middle of the screen and rests. Use `R` or the Restart button to run again.
+When the selected dog completes the course, they automatically walk back toward the middle of the screen and rest. Use `R` or the Restart button to run again.
+
+## Dogs and Levels
+
+- Nova: the original blue-eyed gray-and-white Husky.
+- Hurley: a mostly white Husky with warm brown eyes, charcoal back patches, a white-tipped tail, and teal harness.
+- Happy Course: the original gentle run.
+- Pine Trail: a longer second level with a different obstacle rhythm and more rings.
 
 ## Sound
 
@@ -60,7 +69,7 @@ The game includes generated bark, pant, eating, drinking, and success sounds, pl
 
 | Object | What it means | What to do |
 | --- | --- | --- |
-| ![Ring](assets/images/legend_ring.png) | Ring | Run Nova through it for a happy success. |
+| ![Ring](assets/images/legend_ring.png) | Ring | Run the dog through it for a happy success. |
 | ![Fire](assets/images/legend_fire.png) | Fire | Press Space to jump over it. |
 | ![Pond](assets/images/legend_pond.png) | Pond | Press Space to jump over it. |
 | ![Food](assets/images/legend_food.png) | Food bowl | Stand near it and press F/f to restore energy. |

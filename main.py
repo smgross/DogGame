@@ -32,6 +32,86 @@ SCORE_VALUES = {
 }
 
 
+@dataclass(frozen=True)
+class DogSpec:
+    name: str
+    body: tuple[int, int, int]
+    mask: tuple[int, int, int]
+    light: tuple[int, int, int]
+    eye: tuple[int, int, int]
+    collar: tuple[int, int, int]
+
+
+@dataclass(frozen=True)
+class LevelSpec:
+    name: str
+    world_length: int
+    intro: str
+    finish: str
+    sky: tuple[int, int, int]
+    ground: tuple[int, int, int]
+    path: tuple[int, int, int]
+    obstacles: tuple[tuple[str, float, float], ...]
+
+
+DOGS = (
+    DogSpec("Nova", (112, 137, 158), (64, 83, 104), (245, 249, 250), (92, 159, 210), (239, 76, 92)),
+    DogSpec("Hurley", (235, 239, 235), (47, 49, 49), (250, 251, 247), (127, 88, 45), (45, 126, 127)),
+)
+
+LEVELS = (
+    LevelSpec(
+        "Happy Course",
+        3600,
+        "Guide {dog} through the happy course!",
+        "{dog} finished the course!",
+        (135, 204, 235),
+        (106, 181, 94),
+        (225, 207, 150),
+        (
+            ("ring", 430, 310),
+            ("food", 650, GROUND_Y),
+            ("fire", 840, GROUND_Y),
+            ("ring", 1110, 285),
+            ("water", 1325, GROUND_Y),
+            ("pond", 1545, GROUND_Y),
+            ("ring", 1840, 330),
+            ("fire", 2120, GROUND_Y),
+            ("food", 2360, GROUND_Y),
+            ("pond", 2610, GROUND_Y),
+            ("water", 2880, GROUND_Y),
+            ("ring", 3160, 300),
+        ),
+    ),
+    LevelSpec(
+        "Pine Trail",
+        4300,
+        "Guide {dog} through the pine trail!",
+        "{dog} conquered the pine trail!",
+        (150, 199, 221),
+        (83, 152, 106),
+        (196, 176, 128),
+        (
+            ("ring", 410, 300),
+            ("water", 610, GROUND_Y),
+            ("pond", 805, GROUND_Y),
+            ("ring", 1050, 336),
+            ("fire", 1280, GROUND_Y),
+            ("food", 1515, GROUND_Y),
+            ("ring", 1785, 286),
+            ("pond", 2055, GROUND_Y),
+            ("water", 2305, GROUND_Y),
+            ("fire", 2540, GROUND_Y),
+            ("ring", 2820, 318),
+            ("food", 3100, GROUND_Y),
+            ("pond", 3375, GROUND_Y),
+            ("ring", 3690, 292),
+            ("fire", 3940, GROUND_Y),
+        ),
+    ),
+)
+
+
 def clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
 
@@ -180,14 +260,99 @@ def save_records(records: dict[str, dict[str, int | None]]) -> None:
         pass
 
 
-def make_husky_surface(frame: int = 0) -> pygame.Surface:
+def make_hurley_surface(frame: int = 0) -> pygame.Surface:
+    scale = 3
+    canvas_size = (132 * scale, 92 * scale)
+    surf = pygame.Surface(canvas_size, pygame.SRCALPHA)
+
+    def rect(values: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
+        return tuple(value * scale for value in values)
+
+    def point(values: tuple[int, int]) -> tuple[int, int]:
+        return values[0] * scale, values[1] * scale
+
+    def points(values: list[tuple[int, int]]) -> list[tuple[int, int]]:
+        return [point(value) for value in values]
+
+    def width(value: int) -> int:
+        return value * scale
+
+    white = (247, 249, 244)
+    cream = (230, 232, 223)
+    charcoal = (43, 45, 45)
+    graphite = (86, 91, 91)
+    harness = (39, 125, 126)
+    harness_dark = (26, 65, 76)
+    eye = (126, 79, 34)
+    pink = (230, 126, 140)
+
+    leg_shift = 3 if frame % 2 else -3
+    rear_shift = -2 if frame % 2 else 2
+
+    pygame.draw.ellipse(surf, (42, 58, 76, 58), rect((22, 74, 84, 11)))
+
+    pygame.draw.line(surf, charcoal, point((34, 47)), point((25, 37)), width(10))
+    pygame.draw.line(surf, charcoal, point((25, 37)), point((17, 34)), width(9))
+    pygame.draw.circle(surf, charcoal, point((34, 47)), width(6))
+    pygame.draw.ellipse(surf, white, rect((6, 24, 20, 14)))
+    pygame.draw.circle(surf, white, point((21, 34)), width(5))
+
+    for x, shift, color in [(43, rear_shift, cream), (62, leg_shift, white), (81, -rear_shift, cream), (95, -leg_shift, white)]:
+        pygame.draw.line(surf, color, point((x, 58)), point((x + shift, 82)), width(7))
+        pygame.draw.ellipse(surf, white, rect((x + shift - 6, 78, 15, 8)))
+
+    pygame.draw.ellipse(surf, white, rect((29, 34, 72, 36)))
+    pygame.draw.ellipse(surf, cream, rect((39, 51, 52, 21)))
+    pygame.draw.polygon(
+        surf,
+        charcoal,
+        points([(38, 36), (51, 30), (80, 31), (98, 42), (96, 55), (75, 53), (56, 49), (42, 50)]),
+    )
+    pygame.draw.ellipse(surf, graphite, rect((55, 47, 35, 18)))
+    pygame.draw.circle(surf, white, point((50, 43)), width(10))
+    pygame.draw.ellipse(surf, white, rect((70, 48, 20, 12)))
+
+    pygame.draw.line(surf, harness_dark, point((54, 42)), point((84, 43)), width(6))
+    pygame.draw.line(surf, harness_dark, point((82, 41)), point((95, 35)), width(4))
+    pygame.draw.line(surf, harness, point((58, 45)), point((70, 66)), width(7))
+    pygame.draw.polygon(surf, harness, points([(62, 48), (79, 48), (86, 64), (70, 68), (58, 60)]))
+    pygame.draw.line(surf, (96, 171, 169), point((65, 50)), point((79, 50)), width(2))
+
+    pygame.draw.ellipse(surf, cream, rect((78, 33, 20, 27)))
+    pygame.draw.ellipse(surf, white, rect((83, 23, 37, 30)))
+    pygame.draw.ellipse(surf, white, rect((94, 36, 31, 19)))
+    pygame.draw.ellipse(surf, cream, rect((88, 39, 25, 16)))
+    pygame.draw.polygon(surf, graphite, points([(90, 25), (80, 22), (86, 17), (98, 23), (96, 29)]))
+    pygame.draw.line(surf, cream, point((86, 22)), point((94, 24)), width(2))
+    pygame.draw.polygon(surf, graphite, points([(106, 23), (117, 20), (121, 26), (112, 29)]))
+    pygame.draw.line(surf, cream, point((111, 23)), point((117, 25)), width(2))
+    pygame.draw.arc(surf, graphite, rect((83, 24, 25, 33)), math.pi * 0.78, math.pi * 1.42, width(4))
+
+    pygame.draw.circle(surf, eye, point((105, 36)), width(4))
+    pygame.draw.circle(surf, (32, 22, 15), point((106, 36)), width(2))
+    pygame.draw.circle(surf, (255, 248, 225), point((104, 34)), width(1))
+    pygame.draw.ellipse(surf, (19, 24, 29), rect((116, 43, 10, 8)))
+    pygame.draw.arc(surf, (22, 27, 32), rect((103, 45, 19, 14)), 0.05, math.pi * 0.75, width(2))
+    pygame.draw.ellipse(surf, pink, rect((111, 52, 8, 5)))
+
+    pygame.draw.line(surf, white, point((19, 29)), point((13, 21)), width(3))
+    pygame.draw.circle(surf, (232, 235, 230), point((42, 60)), width(3))
+    pygame.draw.circle(surf, (232, 235, 230), point((86, 62)), width(3))
+
+    return pygame.transform.smoothscale(surf, (132, 92))
+
+
+def make_husky_surface(frame: int = 0, dog: DogSpec = DOGS[0]) -> pygame.Surface:
+    if dog.name == "Hurley":
+        return make_hurley_surface(frame)
+
     surf = pygame.Surface((132, 92), pygame.SRCALPHA)
     leg_shift = 3 if frame % 2 else -2
     shadow = (42, 58, 76, 70)
-    dark = (64, 83, 104)
-    mid = (112, 137, 158)
-    light = (245, 249, 250)
-    blue = (92, 159, 210)
+    dark = dog.mask
+    mid = dog.body
+    light = dog.light
+    blue = dog.eye
     pink = (238, 132, 145)
 
     pygame.draw.ellipse(surf, shadow, (24, 72, 78, 12))
@@ -210,7 +375,7 @@ def make_husky_surface(frame: int = 0) -> pygame.Surface:
     for x, y in [(42, 62), (62, 62), (78, 61), (93, 58)]:
         pygame.draw.line(surf, dark, (x, y), (x + leg_shift, y + 22), 7)
         pygame.draw.ellipse(surf, light, (x + leg_shift - 6, y + 18, 15, 8))
-    pygame.draw.circle(surf, (239, 76, 92), (68, 42), 4)
+    pygame.draw.circle(surf, dog.collar, (68, 42), 4)
     return surf
 
 
@@ -247,8 +412,12 @@ def make_legend_icon_surface(kind: str) -> pygame.Surface:
 
 def save_reference_images() -> None:
     samples = {
-        "husky_run_1.png": make_husky_surface(0),
-        "husky_run_2.png": make_husky_surface(1),
+        "nova_run_1.png": make_husky_surface(0, DOGS[0]),
+        "nova_run_2.png": make_husky_surface(1, DOGS[0]),
+        "hurley_run_1.png": make_husky_surface(0, DOGS[1]),
+        "hurley_run_2.png": make_husky_surface(1, DOGS[1]),
+        "husky_run_1.png": make_husky_surface(0, DOGS[0]),
+        "husky_run_2.png": make_husky_surface(1, DOGS[0]),
         "legend_ring.png": make_legend_icon_surface("ring"),
         "legend_fire.png": make_legend_icon_surface("fire"),
         "legend_pond.png": make_legend_icon_surface("pond"),
@@ -257,8 +426,7 @@ def save_reference_images() -> None:
     }
     for filename, surface in samples.items():
         path = IMAGE_DIR / filename
-        if not path.exists():
-            pygame.image.save(surface, str(path))
+        pygame.image.save(surface, str(path))
 
 
 class SoundBox:
@@ -353,7 +521,7 @@ class Dog:
             self.energy = max(0, self.energy - 4.0)
             self.water = max(0, self.water - 2.0)
 
-    def update(self, keys: pygame.key.ScancodeWrapper, dt: float) -> None:
+    def update(self, keys: pygame.key.ScancodeWrapper, dt: float, world_length: int) -> None:
         if keys[pygame.K_RIGHT]:
             self.speed += 3.0 * dt
         if keys[pygame.K_LEFT]:
@@ -370,7 +538,7 @@ class Dog:
 
         tired_factor = 0.48 if self.energy < 13 or self.water < 13 else 1.0
         self.x += self.speed * 72 * dt * tired_factor
-        self.x = clamp(self.x, 80, WORLD_LENGTH)
+        self.x = clamp(self.x, 80, world_length)
         if self.speed > 0 or self.jumping:
             self.frame_time += dt * (6 + self.speed)
 
@@ -403,6 +571,9 @@ class Game:
         self.small_font = pygame.font.SysFont("segoeui", 16)
         self.big_font = pygame.font.SysFont("segoeui", 34, bold=True)
         self.dog = Dog()
+        self.selected_dog = 0
+        self.selected_level = 0
+        self.level = LEVELS[self.selected_level]
         self.sound = SoundBox()
         self.camera_x = 0.0
         self.score = 0
@@ -415,22 +586,34 @@ class Game:
         self.finish_walkback = False
         self.finish_resting = False
         self.finish_rest_target_x = 0.0
-        self.message = "Guide Nova the Husky through the happy course!"
+        self.message = self.level.intro.format(dog=self.current_dog.name)
         self.message_until = 4200
-        self.obstacles = [
-            Obstacle("ring", 430, 310),
-            Obstacle("food", 650, GROUND_Y),
-            Obstacle("fire", 840, GROUND_Y),
-            Obstacle("ring", 1110, 285),
-            Obstacle("water", 1325, GROUND_Y),
-            Obstacle("pond", 1545, GROUND_Y),
-            Obstacle("ring", 1840, 330),
-            Obstacle("fire", 2120, GROUND_Y),
-            Obstacle("food", 2360, GROUND_Y),
-            Obstacle("pond", 2610, GROUND_Y),
-            Obstacle("water", 2880, GROUND_Y),
-            Obstacle("ring", 3160, 300),
-        ]
+        self.obstacles = self.make_obstacles()
+
+    @property
+    def current_dog(self) -> DogSpec:
+        return DOGS[self.selected_dog]
+
+    @property
+    def ring_total(self) -> int:
+        return sum(1 for obstacle in self.obstacles if obstacle.kind == "ring")
+
+    def make_obstacles(self) -> list[Obstacle]:
+        return [Obstacle(kind, x, y) for kind, x, y in self.level.obstacles]
+
+    def choose_dog(self, direction: int) -> None:
+        if self.started:
+            return
+        self.selected_dog = (self.selected_dog + direction) % len(DOGS)
+        self.message = self.level.intro.format(dog=self.current_dog.name)
+
+    def choose_level(self, direction: int) -> None:
+        if self.started:
+            return
+        self.selected_level = (self.selected_level + direction) % len(LEVELS)
+        self.level = LEVELS[self.selected_level]
+        self.obstacles = self.make_obstacles()
+        self.message = self.level.intro.format(dog=self.current_dog.name)
 
     def set_message(self, text: str, duration: int = 2300) -> None:
         self.message = text
@@ -441,7 +624,7 @@ class Game:
             return
         self.started = True
         self.paused = False
-        self.set_message("Guide Nova the Husky through the happy course!", 4200)
+        self.set_message(self.level.intro.format(dog=self.current_dog.name), 4200)
         self.sound.start_music()
         self.sound.play("bark")
 
@@ -467,9 +650,9 @@ class Game:
         self.finished = True
         self.finish_walkback = True
         self.finish_resting = False
-        self.finish_rest_target_x = clamp(self.camera_x + WIDTH * 0.50, 80, WORLD_LENGTH)
+        self.finish_rest_target_x = clamp(self.camera_x + WIDTH * 0.50, 80, self.level.world_length)
         self.dog.speed = 0.0
-        self.set_message("Course complete! Nova is heading back to rest.", 8000)
+        self.set_message(f"Course complete! {self.current_dog.name} is heading back to rest.", 8000)
         self.sound.play("success")
 
     def update_finish_rest(self, dt: float) -> None:
@@ -487,18 +670,18 @@ class Game:
             self.dog.speed = 0.0
             self.dog.z = 0.0
             self.dog.vz = 0.0
-            self.set_message("Nova is resting after a great run.", 8000)
+            self.set_message(f"{self.current_dog.name} is resting after a great run.", 8000)
 
     def draw_background(self) -> None:
-        self.screen.fill((135, 204, 235))
+        self.screen.fill(self.level.sky)
         pygame.draw.rect(self.screen, (230, 250, 255), (0, 0, WIDTH, 78))
         for i in range(8):
             cx = int((i * 390 - self.camera_x * 0.22) % (WIDTH + 240)) - 120
             pygame.draw.ellipse(self.screen, (248, 252, 253), (cx, 64 + (i % 2) * 28, 105, 34))
             pygame.draw.ellipse(self.screen, (248, 252, 253), (cx + 48, 50 + (i % 2) * 28, 92, 40))
 
-        pygame.draw.rect(self.screen, (106, 181, 94), (0, GROUND_Y + 14, WIDTH, HEIGHT - GROUND_Y))
-        pygame.draw.rect(self.screen, (225, 207, 150), (0, GROUND_Y + 4, WIDTH, 44))
+        pygame.draw.rect(self.screen, self.level.ground, (0, GROUND_Y + 14, WIDTH, HEIGHT - GROUND_Y))
+        pygame.draw.rect(self.screen, self.level.path, (0, GROUND_Y + 4, WIDTH, 44))
         pygame.draw.line(self.screen, (190, 169, 119), (0, GROUND_Y + 47), (WIDTH, GROUND_Y + 47), 3)
         for x in range(-80, WIDTH + 120, 110):
             sx = int((x - self.camera_x * 0.75) % (WIDTH + 180)) - 80
@@ -514,7 +697,7 @@ class Game:
         rounded_rect(self.screen, (37, 53, 67), pygame.Rect(16, 14, 360, 88), 8)
         self.draw_bar("Energy", self.dog.energy, 30, 28, (249, 189, 69))
         self.draw_bar("Water", self.dog.water, 30, 62, (85, 180, 231))
-        score = self.font.render(f"Rings: {self.score}/4   Speed: {self.dog.speed:.1f}", True, (255, 255, 255))
+        score = self.font.render(f"Rings: {self.score}/{self.ring_total}   Speed: {self.dog.speed:.1f}", True, (255, 255, 255))
         self.screen.blit(score, (226, 44))
 
         now = self.pause_started_at if self.paused else pygame.time.get_ticks()
@@ -569,7 +752,7 @@ class Game:
 
     def draw_dog(self) -> None:
         frame = int(self.dog.frame_time) % 2
-        dog_surf = make_husky_surface(frame)
+        dog_surf = make_husky_surface(frame, self.current_dog)
         if self.dog.direction < 0:
             dog_surf = pygame.transform.flip(dog_surf, True, False)
         sx = int(self.dog.x - self.camera_x - 66)
@@ -591,11 +774,11 @@ class Game:
                     obstacle.passed = True
                     self.score += 1
                     self.dog.happy = clamp(self.dog.happy + 8, 0, 100)
-                    self.set_message("Beautiful ring run! Good Husky!")
+                    self.set_message(f"Beautiful ring run! Good {self.current_dog.name}!")
                     self.sound.play("success")
                 elif not obstacle.passed and self.dog.x > obstacle.x + 28:
                     obstacle.passed = True
-                    self.set_message("Close one! Try lining Nova up with the next ring.")
+                    self.set_message(f"Close one! Try lining {self.current_dog.name} up with the next ring.")
             elif obstacle.kind in {"fire", "pond"} and dog_rect.colliderect(obstacle.rect):
                 if self.dog.z > 32:
                     obstacle.passed = True
@@ -627,24 +810,24 @@ class Game:
         if keys[pygame.K_SPACE]:
             self.dog.jump()
         old_x = self.dog.x
-        self.dog.update(keys, dt)
+        self.dog.update(keys, dt, self.level.world_length)
         self.dog.direction = 1 if self.dog.x >= old_x else -1
-        self.camera_x = clamp(self.dog.x - WIDTH * 0.34, 0, WORLD_LENGTH - WIDTH)
+        self.camera_x = clamp(self.dog.x - WIDTH * 0.34, 0, self.level.world_length - WIDTH)
         self.handle_collisions()
 
         now = pygame.time.get_ticks()
         if self.dog.energy < 18:
             self.sound.pant_if_ready(now)
             if now > self.message_until:
-                self.set_message("Nova is low on energy. Find food and press F/f.")
+                self.set_message(f"{self.current_dog.name} is low on energy. Find food and press F/f.")
         elif self.dog.water < 18 and now > self.message_until:
-            self.set_message("Nova is thirsty. Find water and press W/w.")
+            self.set_message(f"{self.current_dog.name} is thirsty. Find water and press W/w.")
 
-        if self.dog.x > WORLD_LENGTH - 150 and not self.finished:
+        if self.dog.x > self.level.world_length - 150 and not self.finished:
             self.begin_finish_rest()
 
     def draw_finish(self) -> None:
-        sx = int(WORLD_LENGTH - 120 - self.camera_x)
+        sx = int(self.level.world_length - 120 - self.camera_x)
         pygame.draw.rect(self.screen, (255, 255, 255), (sx, 215, 8, 180))
         for i in range(8):
             color = (36, 45, 52) if i % 2 else (255, 255, 255)
@@ -677,7 +860,7 @@ class Game:
             ("water", "Water", "press W/w"),
         ]
         start_x = panel.x + 42
-        y = panel.y + 126
+        y = panel.y + (188 if panel.height > 250 else 126)
         for index, (kind, title, hint) in enumerate(items):
             x = start_x + index * 101
             draw_legend_icon(self.screen, kind, (x + 34, y))
@@ -689,9 +872,18 @@ class Game:
     def draw_start_overlay(self) -> None:
         panel = self.draw_center_overlay(
             "Click to Start",
-            "Help Nova run the happy course",
-            pygame.Rect(WIDTH // 2 - 292, HEIGHT // 2 - 126, 584, 238),
+            f"Help {self.current_dog.name} run {self.level.name}",
+            pygame.Rect(WIDTH // 2 - 316, HEIGHT // 2 - 156, 632, 294),
         )
+        dog_text = self.font.render(f"Dog: {self.current_dog.name}  [1/2]", True, (37, 53, 67))
+        level_text = self.font.render(f"Level: {self.level.name}  [Tab]", True, (37, 53, 67))
+        hint_text = self.small_font.render("Press 1/2 to choose a dog. Press Tab to choose a level.", True, (71, 89, 103))
+        preview = make_husky_surface(0, self.current_dog)
+        preview = pygame.transform.smoothscale(preview, (99, 69))
+        self.screen.blit(preview, (panel.x + 54, panel.y + 76))
+        self.screen.blit(dog_text, (panel.x + 174, panel.y + 84))
+        self.screen.blit(level_text, (panel.x + 174, panel.y + 116))
+        self.screen.blit(hint_text, (panel.centerx - hint_text.get_width() // 2, panel.y + 150))
         self.draw_object_key(panel)
 
     def draw_pause_overlay(self) -> None:
@@ -704,15 +896,15 @@ class Game:
         self.draw_finish()
         self.draw_dog()
         if self.finished:
-            text = self.big_font.render("Nova finished the course!", True, (255, 255, 255))
+            text = self.big_font.render(self.level.finish.format(dog=self.current_dog.name), True, (255, 255, 255))
             panel = pygame.Rect(WIDTH // 2 - 230, 118, 460, 128)
             rounded_rect(self.screen, (49, 103, 82), panel, 8)
             self.screen.blit(text, (WIDTH // 2 - text.get_width() // 2, 128))
 
             if self.finish_walkback:
-                rest_text = self.font.render("Nova is walking back to rest.", True, (255, 250, 218))
+                rest_text = self.font.render(f"{self.current_dog.name} is walking back to rest.", True, (255, 250, 218))
             else:
-                rest_text = self.font.render("Nova is resting. Great run!", True, (255, 250, 218))
+                rest_text = self.font.render(f"{self.current_dog.name} is resting. Great run!", True, (255, 250, 218))
             self.screen.blit(rest_text, (WIDTH // 2 - rest_text.get_width() // 2, 164))
 
             rounded_rect(self.screen, (255, 250, 218), self.restart_button_rect, 8)
@@ -741,6 +933,14 @@ class Game:
                     running = False
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     running = False
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_1 and not self.started:
+                    self.selected_dog = 0
+                    self.message = self.level.intro.format(dog=self.current_dog.name)
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_2 and not self.started:
+                    self.selected_dog = 1
+                    self.message = self.level.intro.format(dog=self.current_dog.name)
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_TAB and not self.started:
+                    self.choose_level(1)
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                     self.toggle_pause()
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_r and self.finished:
